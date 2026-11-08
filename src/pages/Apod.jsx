@@ -6,6 +6,7 @@
 //   - Title, date, explanation, copyright (right panel)
 // ============================================================
 
+import { useState, useEffect } from 'react';
 import useFetch from '../hooks/useFetch';
 import { API }  from '../utils/constants';
 import SectionHeader from '../components/SectionHeader';
@@ -24,6 +25,34 @@ const FALLBACK_APOD = {
 function Apod() {
   const { data, loading, error } = useFetch(API.APOD);
   const activeData = (data && data.url) ? data : (error ? FALLBACK_APOD : null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const toggleSpeech = () => {
+    if (!window.speechSynthesis || !activeData) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(
+        `Astronomy Picture of the Day. ${activeData.title}. ${activeData.explanation}`
+      );
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
 
   return (
     <main className="page-wrap">
@@ -79,8 +108,29 @@ function Apod() {
 
               <p className="apod-explanation">{activeData.explanation}</p>
 
+              {/* Interactive Audio Tour & Actions */}
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={toggleSpeech}
+                  className="btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <span>{isSpeaking ? '⏹ STOP NARRATION' : '🔊 LISTEN TO AUDIO TOUR'}</span>
+                </button>
+                <a
+                  href={activeData.hdurl || activeData.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn"
+                  style={{ border: '1px solid rgba(255,255,255,0.2)', color: '#fff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}
+                >
+                  <span>⬇ VIEW ORIGINAL HD</span>
+                </a>
+              </div>
+
               {activeData.copyright && (
-                <div className="apod-copyright">COPYRIGHT: {activeData.copyright}</div>
+                <div className="apod-copyright" style={{ marginTop: '16px' }}>COPYRIGHT: {activeData.copyright}</div>
               )}
             </div>
 
