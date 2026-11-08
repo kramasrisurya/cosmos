@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/nasa/(.*)",
+      "destination": "https://api.nasa.gov/$1"
+    },
+    {
+      "source": "/iss/(.*)",
+      "destination": "http://api.open-notify.org/$1"
+    },
+    {
+      "source": "/spacenews/(.*)",
+      "destination": "https://api.spaceflightnewsapi.net/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
