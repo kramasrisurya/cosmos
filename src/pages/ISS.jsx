@@ -199,7 +199,9 @@ function ISS() {
     const fetchISS = async () => {
       try {
         const res  = await fetch(API.ISS);
-        const data = await res.json(); // clean JSON now via Vite proxy
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data?.iss_position?.latitude || !data?.iss_position?.longitude) return;
         const lat  = parseFloat(data.iss_position.latitude);
         const lng  = parseFloat(data.iss_position.longitude);
 
